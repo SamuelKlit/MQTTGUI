@@ -3,15 +3,14 @@ package com.samuelklit;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
+
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-public class Application {
+public class Application implements MqttCallback {
 
     private JPanel panel;
-    private JButton LoadBTN;
+    private JButton subscribeBTN;
     private JTextArea zzzzzTextArea;
     private JTextField publishTXT;
     private JButton publishBTN;
@@ -31,7 +30,7 @@ public class Application {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-        frame.setSize(600,400);
+        frame.setSize(400,350);
     }
 
     public void Connect(String clientId, String username, String password){
@@ -40,8 +39,9 @@ public class Application {
             connOpts = new MqttConnectOptions();
             persistence = new MemoryPersistence();
             client = new MqttClient("tcp://" + brokerIPTXT.getText(), clientId, persistence);
-            System.out.println("Setting clean session.");
+
             connOpts.setCleanSession(true);
+            client.setCallback(this);
 
             System.out.println("Username:" + username + ": Password:" + password+":");
             if(username != null && !username.trim().isEmpty()){
@@ -56,19 +56,21 @@ public class Application {
 
             client.connect(connOpts);
             System.out.println("Connected");
-            //MqttMessage message = new MqttMessage(publishTXT.getText().getBytes());
-            //message.setQos(2);
-            //client.publish(topic, message);
+
             //client.disconnect();
 
         }catch(MqttException me) {
-            System.out.println("reason "+me.getReasonCode());
-            System.out.println("msg "+me.getMessage());
-            System.out.println("loc "+me.getLocalizedMessage());
-            System.out.println("cause "+me.getCause());
-            System.out.println("excep "+me);
-            me.printStackTrace();
+            printMQTTError(me);
         }
+    }
+
+    public void printMQTTError(MqttException me){
+        System.out.println("reason "+me.getReasonCode());
+        System.out.println("msg "+me.getMessage());
+        System.out.println("loc "+me.getLocalizedMessage());
+        System.out.println("cause "+me.getCause());
+        System.out.println("excep "+me);
+        me.printStackTrace();
     }
 
     public Application() {
@@ -84,19 +86,46 @@ public class Application {
             }
         });
 
-        LoadBTN.addActionListener(new ActionListener() {
+        subscribeBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                try{
+                    client.subscribe(topicTXT.getText());
+                    System.out.println("Subscribed!");
+                }catch(MqttException me) {
+                    printMQTTError(me);
+                }
             }
         });
 
         publishBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                try{
+                    MqttMessage message = new MqttMessage(publishTXT.getText().getBytes());
+                    message.setQos(2);
+                    client.publish(topicTXT.getText(), message);
+                }catch(MqttException me) {
+                    printMQTTError(me);
+                }
             }
         });
+
+    }
+
+    @Override
+    public void connectionLost(Throwable throwable) {
+
+    }
+
+    @Override
+    public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
+        topicReceivedTXT.append(mqttMessage.toString() + "\n");
+        System.out.println("Received: " + mqttMessage.toString());
+    }
+
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
 
     }
 }
