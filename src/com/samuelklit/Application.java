@@ -3,7 +3,6 @@ package com.samuelklit;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -18,7 +17,6 @@ public class Application implements MqttCallback {
     private JTextArea topicReceivedTXT;
     private JTextField brokerIPTXT;
     private JButton connectionBTN;
-
 
     private MqttClient client;
     private MqttConnectOptions connOpts;
@@ -56,9 +54,6 @@ public class Application implements MqttCallback {
 
             client.connect(connOpts);
             System.out.println("Connected");
-
-            //client.disconnect();
-
         }catch(MqttException me) {
             printMQTTError(me);
         }
@@ -78,6 +73,11 @@ public class Application implements MqttCallback {
         connectionBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(brokerIPTXT.getText() == null | brokerIPTXT.getText().trim().isEmpty() ){
+                    JOptionPane.showMessageDialog(null, "Please enter broker IP");
+                    return;
+                }
+
                 BrokerSettings dialog = new BrokerSettings(Application.this);
                 dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 dialog.pack();
@@ -89,6 +89,11 @@ public class Application implements MqttCallback {
         subscribeBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(client == null || !client.isConnected()){
+                    JOptionPane.showMessageDialog(null, "Please connect to a broker first.");
+                    return;
+                }
+
                 try{
                     client.subscribe(topicTXT.getText());
                     System.out.println("Subscribed!");
@@ -101,6 +106,11 @@ public class Application implements MqttCallback {
         publishBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(client == null || !client.isConnected()){
+                    JOptionPane.showMessageDialog(null, "Please connect to a broker first.");
+                    return;
+                }
+
                 try{
                     MqttMessage message = new MqttMessage(publishTXT.getText().getBytes());
                     message.setQos(2);
@@ -110,12 +120,6 @@ public class Application implements MqttCallback {
                 }
             }
         });
-
-    }
-
-    @Override
-    public void connectionLost(Throwable throwable) {
-
     }
 
     @Override
@@ -126,6 +130,11 @@ public class Application implements MqttCallback {
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+    }
+
+    @Override
+    public void connectionLost(Throwable throwable) {
 
     }
 }
