@@ -3,6 +3,9 @@ package com.samuelklit;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.NoRouteToHostException;
+import java.net.SocketException;
+
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -54,8 +57,15 @@ public class Application implements MqttCallback {
             client.connect(connOpts);
             System.out.println("Connected");
             JOptionPane.showMessageDialog(null, "Connected");
-        }catch(MqttException me) {
-            printMQTTError(me);
+        }
+        catch(Exception e) {
+            if(e instanceof MqttException){
+                printMQTTError((MqttException)e);
+            }else{
+                JOptionPane.showMessageDialog(null, "Can't connect to server.");
+                System.out.println(e.getMessage());
+            }
+
         }
     }
 
