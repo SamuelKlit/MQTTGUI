@@ -54,6 +54,7 @@ public class Application implements MqttCallback {
 
             client.connect(connOpts);
             System.out.println("Connected");
+            JOptionPane.showMessageDialog(null, "Connected");
         }catch(MqttException me) {
             printMQTTError(me);
         }
@@ -97,6 +98,8 @@ public class Application implements MqttCallback {
                 try{
                     client.subscribe(topicTXT.getText());
                     System.out.println("Subscribed!");
+                    JOptionPane.showMessageDialog(null, "Subscribed");
+                    topicReceivedTXT.setText("");
                 }catch(MqttException me) {
                     printMQTTError(me);
                 }
