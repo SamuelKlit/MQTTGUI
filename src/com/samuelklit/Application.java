@@ -59,13 +59,8 @@ public class Application implements MqttCallback {
             JOptionPane.showMessageDialog(null, "Connected");
         }
         catch(Exception e) {
-            if(e instanceof MqttException){
-                printMQTTError((MqttException)e);
-            }else{
-                JOptionPane.showMessageDialog(null, "Can't connect to server.");
-                System.out.println(e.getMessage());
-            }
-
+            printMQTTError((MqttException)e);
+            JOptionPane.showMessageDialog(null, "Can't connect to server.");
         }
     }
 
