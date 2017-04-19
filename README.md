@@ -1,2 +1,2 @@
 # MQTTGUI
-Basic Java MQTT transceiver using the Paho libarary.
+Basic Java MQTT transceiver using the Paho library.
