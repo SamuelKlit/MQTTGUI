@@ -10,13 +10,12 @@ public class Application implements MqttCallback {
 
     private JPanel panel;
     private JButton subscribeBTN;
-    private JTextArea zzzzzTextArea;
     private JTextField publishTXT;
     private JButton publishBTN;
     private JTextField topicTXT;
-    private JTextArea topicReceivedTXT;
     private JTextField brokerIPTXT;
     private JButton connectionBTN;
+    private JTextArea topicReceivedTXT;
 
     private MqttClient client;
     private MqttConnectOptions connOpts;
@@ -127,7 +126,7 @@ public class Application implements MqttCallback {
 
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-        topicReceivedTXT.append(mqttMessage.toString() + "\n");
+        topicReceivedTXT.setText(mqttMessage.toString() + "\n" + topicReceivedTXT.getText());
         System.out.println("Received: " + mqttMessage.toString());
     }
 
