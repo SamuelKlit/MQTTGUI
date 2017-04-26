@@ -3,9 +3,7 @@ package com.samuelklit;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.NoRouteToHostException;
-import java.net.SocketException;
-import java.util.Date;
+import java.util.ArrayList;
 
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -22,7 +20,7 @@ public class Application implements MqttCallback {
     private JTextArea topicReceivedTXT;
     private static JFrame myFrame;
 
-
+    private ArrayList<String> subscribedTopics;
     private MqttClient client;
 
     public static void main(String[] args) {
@@ -36,7 +34,12 @@ public class Application implements MqttCallback {
 
     void Connect(String clientId, String username, String password){
         try{
-            System.out.println("Starting connection");
+            //Unsubscribe from all topics from old broker.
+            if(subscribedTopics != null){
+                client.unsubscribe((String[]) subscribedTopics.toArray());
+                subscribedTopics = new ArrayList<String>();
+            }
+            
             MqttConnectOptions connOpts = new MqttConnectOptions();
             MemoryPersistence persistence = new MemoryPersistence();
             client = new MqttClient("tcp://" + brokerIPTXT.getText(), clientId, persistence);
@@ -61,7 +64,10 @@ public class Application implements MqttCallback {
             JOptionPane.showMessageDialog(null, "Connected");
         }
         catch(Exception e) {
-            printMQTTError((MqttException)e);
+            if(e instanceof MqttException){
+                printMQTTError((MqttException)e);
+            }
+
             JOptionPane.showMessageDialog(null, "Can't connect to server.");
         }
     }
@@ -72,7 +78,7 @@ public class Application implements MqttCallback {
         System.out.println("msg "+me.getMessage());
         System.out.println("loc "+me.getLocalizedMessage());
         System.out.println("cause "+me.getCause());
-        System.out.println("excep "+me);
+        System.out.println("exception "+me);
         me.printStackTrace();
     }
 
@@ -104,10 +110,9 @@ public class Application implements MqttCallback {
 
                 try{
                     client.subscribe(topicTXT.getText());
-                    System.out.println("Subscribed!");
+                    subscribedTopics.add(topicTXT.getText());
                     status("Subscribed");
                     JOptionPane.showMessageDialog(null, "Subscribed");
-                    topicReceivedTXT.setText("");
                 }catch(MqttException me) {
                     printMQTTError(me);
                 }
@@ -136,8 +141,7 @@ public class Application implements MqttCallback {
 
     @Override
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
-        topicReceivedTXT.setText(mqttMessage.toString() + "\n" + topicReceivedTXT.getText());
-        System.out.println("Received: " + mqttMessage.toString());
+        topicReceivedTXT.setText(s + ": "+  mqttMessage.toString() + "\n" + topicReceivedTXT.getText());
         status("Message received.");
     }
 
