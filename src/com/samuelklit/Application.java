@@ -39,7 +39,7 @@ public class Application implements MqttCallback {
                 client.unsubscribe((String[]) subscribedTopics.toArray());
                 subscribedTopics = new ArrayList<String>();
             }
-            
+
             MqttConnectOptions connOpts = new MqttConnectOptions();
             MemoryPersistence persistence = new MemoryPersistence();
             client = new MqttClient("tcp://" + brokerIPTXT.getText(), clientId, persistence);
@@ -124,6 +124,9 @@ public class Application implements MqttCallback {
             public void actionPerformed(ActionEvent e) {
                 if(client == null || !client.isConnected()){
                     JOptionPane.showMessageDialog(null, "Please connect to a broker first.");
+                    return;
+                }else if(topicTXT.getText() == ""){
+                    JOptionPane.showMessageDialog(null, "Please subscribe to a topic first.");
                     return;
                 }
 
