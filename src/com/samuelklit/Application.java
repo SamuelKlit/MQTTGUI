@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
+import java.util.Date;
 
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -19,25 +20,25 @@ public class Application implements MqttCallback {
     private JTextField brokerIPTXT;
     private JButton connectionBTN;
     private JTextArea topicReceivedTXT;
+    private static JFrame myFrame;
+
 
     private MqttClient client;
-    private MqttConnectOptions connOpts;
-    private MemoryPersistence persistence;
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("MQTT Transceiver");
-        frame.setContentPane(new Application().panel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-        frame.setSize(400,350);
+        myFrame = new JFrame("MQTT Transceiver");
+        myFrame.setContentPane(new Application().panel);
+        myFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        myFrame.pack();
+        myFrame.setVisible(true);
+        myFrame.setSize(400,350);
     }
 
-    public void Connect(String clientId, String username, String password){
+    void Connect(String clientId, String username, String password){
         try{
             System.out.println("Starting connection");
-            connOpts = new MqttConnectOptions();
-            persistence = new MemoryPersistence();
+            MqttConnectOptions connOpts = new MqttConnectOptions();
+            MemoryPersistence persistence = new MemoryPersistence();
             client = new MqttClient("tcp://" + brokerIPTXT.getText(), clientId, persistence);
 
             connOpts.setCleanSession(true);
@@ -56,6 +57,7 @@ public class Application implements MqttCallback {
 
             client.connect(connOpts);
             System.out.println("Connected");
+            status("Connected");
             JOptionPane.showMessageDialog(null, "Connected");
         }
         catch(Exception e) {
@@ -64,7 +66,8 @@ public class Application implements MqttCallback {
         }
     }
 
-    public void printMQTTError(MqttException me){
+    private void printMQTTError(MqttException me){
+        status("Error!");
         System.out.println("reason "+me.getReasonCode());
         System.out.println("msg "+me.getMessage());
         System.out.println("loc "+me.getLocalizedMessage());
@@ -73,7 +76,7 @@ public class Application implements MqttCallback {
         me.printStackTrace();
     }
 
-    public Application() {
+    private Application() {
 
         connectionBTN.addActionListener(new ActionListener() {
             @Override
@@ -102,6 +105,7 @@ public class Application implements MqttCallback {
                 try{
                     client.subscribe(topicTXT.getText());
                     System.out.println("Subscribed!");
+                    status("Subscribed");
                     JOptionPane.showMessageDialog(null, "Subscribed");
                     topicReceivedTXT.setText("");
                 }catch(MqttException me) {
@@ -122,6 +126,7 @@ public class Application implements MqttCallback {
                     MqttMessage message = new MqttMessage(publishTXT.getText().getBytes());
                     message.setQos(2);
                     client.publish(topicTXT.getText(), message);
+                    status("Published message.");
                 }catch(MqttException me) {
                     printMQTTError(me);
                 }
@@ -133,15 +138,20 @@ public class Application implements MqttCallback {
     public void messageArrived(String s, MqttMessage mqttMessage) throws Exception {
         topicReceivedTXT.setText(mqttMessage.toString() + "\n" + topicReceivedTXT.getText());
         System.out.println("Received: " + mqttMessage.toString());
+        status("Message received.");
     }
 
     @Override
     public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-
+        status("Delivery complete.");
     }
 
     @Override
     public void connectionLost(Throwable throwable) {
+        status("Connection lost.");
+    }
 
+    private void status(String message){
+        myFrame.setTitle("MQTTGUI. Status: " + message);
     }
 }
