@@ -37,9 +37,14 @@ public class Application implements MqttCallback {
         try{
             //Unsubscribe from all topics from old broker.
             if(subscribedTopics != null){
-                client.unsubscribe((String[]) subscribedTopics.toArray());
-                subscribedTopics = new ArrayList<String>();
+                if(subscribedTopics.size() > 0){
+                    client.unsubscribe((subscribedTopics.toArray(new String[subscribedTopics.size()])));
+                    subscribedTopics = new ArrayList<String>();
+                }
             }
+
+            //Clear received box.
+            topicReceivedTXT.setText("");
 
             //Connect to broker.
             MqttConnectOptions connOpts = new MqttConnectOptions();
