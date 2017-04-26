@@ -41,6 +41,7 @@ public class Application implements MqttCallback {
                 subscribedTopics = new ArrayList<String>();
             }
 
+            //Connect to broker.
             MqttConnectOptions connOpts = new MqttConnectOptions();
             MemoryPersistence persistence = new MemoryPersistence();
             client = new MqttClient("tcp://" + brokerIPTXT.getText(), clientId, persistence);
@@ -105,8 +106,12 @@ public class Application implements MqttCallback {
         subscribeBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //Check if action is valid.
                 if(client == null || !client.isConnected()){
                     JOptionPane.showMessageDialog(null, "Please connect to a broker first.");
+                    return;
+                }else if(topicTXT.getText().isEmpty()){
+                    JOptionPane.showMessageDialog(null, "Topic cannot be empty.");
                     return;
                 }
 
@@ -131,6 +136,7 @@ public class Application implements MqttCallback {
         publishBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //Check if action is valid.
                 if(client == null || !client.isConnected()){
                     JOptionPane.showMessageDialog(null, "Please connect to a broker first.");
                     return;
@@ -139,6 +145,7 @@ public class Application implements MqttCallback {
                     return;
                 }
 
+                //Publish on topic.
                 try{
                     MqttMessage message = new MqttMessage(publishTXT.getText().getBytes());
                     message.setQos(2);
