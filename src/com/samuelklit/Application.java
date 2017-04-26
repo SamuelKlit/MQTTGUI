@@ -30,6 +30,7 @@ public class Application implements MqttCallback {
         myFrame.pack();
         myFrame.setVisible(true);
         myFrame.setSize(400,350);
+
     }
 
     void Connect(String clientId, String username, String password){
@@ -66,6 +67,8 @@ public class Application implements MqttCallback {
         catch(Exception e) {
             if(e instanceof MqttException){
                 printMQTTError((MqttException)e);
+            }else{
+                System.out.println(e.getMessage());
             }
 
             JOptionPane.showMessageDialog(null, "Can't connect to server.");
@@ -83,7 +86,6 @@ public class Application implements MqttCallback {
     }
 
     private Application() {
-
         connectionBTN.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -110,10 +112,17 @@ public class Application implements MqttCallback {
 
                 try{
                     client.subscribe(topicTXT.getText());
+
+                    if(subscribedTopics == null){
+                        subscribedTopics = new ArrayList<String>();
+                    }
                     subscribedTopics.add(topicTXT.getText());
-                    status("Subscribed");
+
                     JOptionPane.showMessageDialog(null, "Subscribed");
+                    status("Subscribed");
                 }catch(MqttException me) {
+                    status("Error");
+                    JOptionPane.showMessageDialog(null, "Couldn't subscribe to topic.");
                     printMQTTError(me);
                 }
             }
