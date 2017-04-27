@@ -2,6 +2,7 @@ package com.samuelklit;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.Random;
 
 public class BrokerSettings extends JDialog {
     private JPanel contentPane;
@@ -10,10 +11,13 @@ public class BrokerSettings extends JDialog {
     private JTextField usernameTXT;
     private JTextField passwordTXT;
     private JTextField clientIDTXT;
+    private JButton randomizeBTN;
     private Application app;
+    private Random rnd;
 
 
     public BrokerSettings(Application app) {
+        rnd = new Random();
         this.app = app;
         setContentPane(contentPane);
         setModal(true);
@@ -45,6 +49,13 @@ public class BrokerSettings extends JDialog {
                 onCancel();
             }
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+        randomizeBTN.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clientIDTXT.setText("MQTTGUI-" + rnd.nextInt(100000));
+            }
+        });
     }
 
     private void onOK() {
@@ -53,14 +64,6 @@ public class BrokerSettings extends JDialog {
     }
 
     private void onCancel() {
-        // add your code here if necessary
         dispose();
     }
-
-    //public static void main(String[] args) {
-    //    BrokerSettings dialog = new BrokerSettings();
-    //    dialog.pack();
-    //    dialog.setVisible(true);
-    //    System.exit(0);
-    //}
 }

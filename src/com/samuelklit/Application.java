@@ -43,9 +43,6 @@ public class Application implements MqttCallback {
                 }
             }
 
-            //Clear received box.
-            topicReceivedTXT.setText("");
-
             //Connect to broker.
             MqttConnectOptions connOpts = new MqttConnectOptions();
             MemoryPersistence persistence = new MemoryPersistence();
@@ -103,7 +100,7 @@ public class Application implements MqttCallback {
                 BrokerSettings dialog = new BrokerSettings(Application.this);
                 dialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 dialog.pack();
-                dialog.setSize(250,160);
+                dialog.setSize(350,160);
                 dialog.show();
             }
         });
